@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig host="54.153.252.208" id="c74702c8-ae24-4593-9c31-3ae4cd46561e" keyPath="$USER_HOME$/.ssh/wog.pem" port="22" nameFormat="DESCRIPTIVE" username="bitnami" useOpenSSHConfig="true" />
+    </configs>
+  </component>
+</project>

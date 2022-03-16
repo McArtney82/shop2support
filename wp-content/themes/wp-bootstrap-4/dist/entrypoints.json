@@ -1,0 +1,12 @@
+{
+  "entrypoints": {
+    "_app": {
+      "css": [
+        "/wp-content/themes/wp-bootstrap-4/dist/./css/_app.min.css"
+      ],
+      "js": [
+        "/wp-content/themes/wp-bootstrap-4/dist/./js/_app.min.js"
+      ]
+    }
+  }
+}

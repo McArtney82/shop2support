@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="23ecb9fa-e12b-40da-b1a5-5ab41d86e979" name="Shop2Support_LIVE" url="http://shop2support.com">
+        <fileTransfer rootFolder="/home/bitnami/apps/wordpress/htdocs/" accessType="SFTP" host="54.153.252.208" port="22" sshConfigId="c74702c8-ae24-4593-9c31-3ae4cd46561e" sshConfig="bitnami@54.153.252.208:22 key" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
