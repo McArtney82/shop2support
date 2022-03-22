@@ -1,0 +1,62 @@
+/*
+ * [ base / default ]
+ */
+
+// -----------------------------------------------------------------------------
+
+:root {
+  --scroll-bar: 17px;
+}
+
+*,
+:before,
+:after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: theme('colors.gray.200');
+}
+
+html, body {
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+body {
+  line-height: 1.5;
+  font-size: 16px;
+  background-color: theme('colors.gray.100');
+  color: theme('colors.gray.900');
+  overflow-x: hidden;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+hr {
+  border-top-width: 1px;
+  border-color: theme('colors.gray.300')
+}
+
+table {
+  border-collapse: collapse;
+}
+
+a {
+  text-decoration: none;
+}
+
+select {
+  color: theme('colors.gray.900');
+}
+
+[hidden],
+[type="hidden"] {
+  display: none;
+}
+
+[disabled="true"] {
+  cursor: not-allowed !important;
+  opacity: 0.75;
+}

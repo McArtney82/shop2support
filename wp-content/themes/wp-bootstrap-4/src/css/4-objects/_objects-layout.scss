@@ -1,0 +1,21 @@
+/*
+ * [ objects / layout ]
+ */
+
+// -----------------------------------------------------------------------------
+
+// Container
+.o-container {
+  @apply _px-6 _mx-auto;
+  width: 100%;
+  max-width: 1192px;
+  position: relative;
+
+  &#{&}--large {
+    max-width: 1376px;
+  }
+
+  @screen sm {
+    @apply _px-8;
+  }
+}

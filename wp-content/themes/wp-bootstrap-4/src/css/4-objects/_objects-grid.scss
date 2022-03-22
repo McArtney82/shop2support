@@ -1,0 +1,42 @@
+/*
+ * [ objects / grid ]
+ */
+
+// -----------------------------------------------------------------------------
+
+.o-grid {
+  min-width: 100%;
+  display: flex;
+  flex-flow: row wrap;
+  @apply _-m-4;
+
+  @responsive {
+    &#{&}--tighter {
+      @apply _-m-2;
+    }
+  }
+}
+
+[class*="o-col-"] {
+  width: 100%;
+  min-height: 1px;
+  @apply _p-4;
+
+  @responsive {
+   .o-grid--tighter > & {
+      @apply _p-2;
+    }
+  }
+}
+
+@responsive {
+  @for $i from 1 through 12 {
+    .o-col-#{$i} {
+      flex: 0 0 percentage($i / 12);
+      max-width: percentage($i / 12);
+    }
+    .o-offset-#{$i} {
+      margin-left: percentage($i / 12);
+    }
+  }
+}

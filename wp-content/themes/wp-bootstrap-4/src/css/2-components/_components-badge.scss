@@ -1,0 +1,36 @@
+/*
+ * [ components / badges ]
+ */
+
+// -----------------------------------------------------------------------------
+
+._Badge {
+  @apply _text-xs;
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  user-select: none;
+  background: rgba(#000, 0.7);
+  box-shadow: 0 4px 6px rgba(#000, 0.16);
+  color: #FFF !important;
+  text-decoration: none !important;
+
+  .post-header & {
+    box-shadow: none;
+  }
+
+  &:hover {
+    background: #000;
+  }
+}
+
+._Badge i {
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin-left: 4px;
+  border-radius: 50%;
+  padding: 2px;
+  background: rgba(#FFF, 0.2);
+}

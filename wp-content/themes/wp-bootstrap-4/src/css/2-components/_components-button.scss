@@ -1,0 +1,59 @@
+/*
+ * [ components / buttons ]
+ */
+
+// -----------------------------------------------------------------------------
+
+._Button {
+  display: inline-block;
+  line-height: 1;
+  border: solid 1px transparent;
+  padding: theme('spacing.3') theme('spacing.5');
+  outline: none;
+  font-size: theme('fontSize.sm');
+  background: none;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  text-align: center;
+  border-radius: theme('borderRadius.md');
+  text-decoration: none !important;
+}
+
+
+// 2. Alternative colors
+// ====================================
+
+$buttons: (
+  ('primary', theme('colors.primary.600'), theme('colors.white'), theme('colors.primary.300'), theme('colors.primary.800')),
+  ('gray', theme('colors.gray.600'), theme('colors.white'), theme('colors.gray.300'), theme('colors.gray.800')),
+);
+
+@each $el, $c1, $c2, $c3, $c4 in $buttons {
+  ._Button--#{$el} {
+    color: $c2 !important;
+    background: $c1;
+    border-color: $c3;
+
+    &:not([disabled]):focus,
+    &:not([disabled]):hover {
+      background: $c4;
+    }
+  }
+
+  ._Button--outline--#{$el} {
+    color: $c3 !important;
+    border-color: $c3;
+
+    &:not([disabled]):focus,
+    &:not([disabled]):hover {
+      color: $c2 !important;
+      background: $c4;
+    }
+  }
+}
+
+.Button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

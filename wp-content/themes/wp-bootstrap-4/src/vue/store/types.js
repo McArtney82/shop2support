@@ -1,0 +1,15 @@
+export const GET_CATEGORY = 'category/get'
+export const GET_SEARCH = 'search/get'
+export const IS_FAVOURITES = 'favourites/get'
+export const GET_RESULTS = 'results/get'
+
+export const SET_CATEGORY = 'category/set'
+export const SET_SEARCH = 'search/set'
+export const SET_FAVOURITES = 'favourites/set'
+export const SET_RESULTS = 'results/set'
+
+export const DISPATCH_CATEGORY = 'category/action'
+export const DISPATCH_SEARCH = 'search/action'
+export const DISPATCH_FAVOURITES = 'favourites/action'
+export const DISPATCH_RESULTS = 'results/action'
+export const RESET_ALL = 'all/action'
