@@ -91,7 +91,9 @@ export default {
                 isLoaded.value = true
 
                 window.addEventListener('scroll', debounce(() => {
-                    if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 50)) {
+                    console.log(window.innerHeight + window.scrollY)
+                    console.log(document.body.offsetHeight - 1500)
+                    if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 1500)) {
                         loadMore()
                     }
                 }, 500, { leading: true }))
