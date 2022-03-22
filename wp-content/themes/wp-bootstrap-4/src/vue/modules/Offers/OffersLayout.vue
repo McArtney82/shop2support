@@ -92,8 +92,9 @@ export default {
 
                 window.addEventListener('scroll', debounce(() => {
                     console.log(window.innerHeight + window.scrollY)
-                    console.log(document.body.offsetHeight - 1500)
-                    if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 1500)) {
+                    console.log(document.body.offsetHeight + 200)
+                    if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight + 200)) {
+                        window.scrollTo(0, document.body.offsetHeight + 300)
                         loadMore()
                     }
                 }, 500, { leading: true }))
