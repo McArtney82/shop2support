@@ -1,4 +1,4 @@
-import { SET_CATEGORY, SET_FAVOURITES, SET_RESULTS, SET_SEARCH } from '@/store/types'
+import { SET_CATEGORY, SET_FAVOURITES, SET_RESULTS, SET_SEARCH, SET_SORT } from '@/store/types'
 
 export default {
     /**
@@ -26,6 +26,15 @@ export default {
      */
     [SET_FAVOURITES] (state, payload) {
         state.isFavourites = payload
+    },
+
+    /**
+     *
+     * @param state
+     * @param payload
+     */
+    [SET_SORT] (state, payload) {
+        state.sort = payload
     },
 
     /**

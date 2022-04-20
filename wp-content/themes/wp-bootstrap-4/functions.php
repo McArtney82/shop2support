@@ -477,3 +477,9 @@ function custom_login(){
     echo '<style type="text/css"> .login #backtoblog, .login #nav {display:none!important}
 .login h1 a {display:none!important} .reset-pass a{display:none}</style>';
 }
+
+add_filter( 'acf/get_post_types', 'filter_acf_get_post_types', 10, 1 );
+
+function filter_acf_get_post_types($array){
+    error_log(print_r($array,true));
+}

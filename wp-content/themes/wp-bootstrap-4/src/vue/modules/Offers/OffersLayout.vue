@@ -36,7 +36,15 @@ import OfferCard from '@/modules/Offers/Card/OfferCard'
 import OffersFilters from '@/modules/Offers/OffersFilters'
 import { useLoading } from '@/composables'
 import { handleErrors, req } from '@/common/methods'
-import { DISPATCH_RESULTS, GET_CATEGORY, GET_RESULTS, GET_SEARCH, IS_FAVOURITES, RESET_ALL } from '@/store/types'
+import {
+  DISPATCH_RESULTS,
+  GET_CATEGORY,
+  GET_RESULTS,
+  GET_SEARCH,
+  GET_SORT,
+  IS_FAVOURITES,
+  RESET_ALL
+} from '@/store/types'
 
 export default {
     name: 'OffersLayout',
@@ -63,6 +71,7 @@ export default {
             total: 0,
             perPage: 10,
             search: computed(() => store.getters['offers/' + GET_SEARCH]),
+            sort: computed(() => store.getters['offers/' + GET_SORT]),
             results: computed(() => store.getters['offers/' + GET_RESULTS]),
             favouritesOnly: computed(() => store.getters['offers/' + IS_FAVOURITES]),
             category: computed(() => store.getters['offers/' + GET_CATEGORY])
@@ -85,14 +94,17 @@ export default {
             loadMore(true)
         })
 
+      watch(() => args.sort, () => {
+        reset()
+        loadMore(true)
+      })
+
         onMounted(() => {
             load(fetchOffers).then(({ results }) => {
                 store.dispatch('offers/' + DISPATCH_RESULTS, results)
                 isLoaded.value = true
 
                 window.addEventListener('scroll', debounce(() => {
-                    console.log(window.innerHeight + window.scrollY)
-                    console.log(document.body.offsetHeight - 200)
                     if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 200)) {
                         window.scrollTo(0, document.body.offsetHeight)
                         loadMore()
@@ -123,6 +135,19 @@ export default {
 
             if (args.search) {
                 route += `&search=${args.search}`
+            }
+
+            if(args.sort){
+              let sort = ''
+              let direction = ''
+              if (args.sort == 'a-z'){
+                sort = 'title'
+                direction = 'ASC'
+              } else {
+                sort = 'title'
+                direction = 'DESC'
+              }
+              route += `&sort=${sort}&direction=${direction}`
             }
 
             return req.get(route)

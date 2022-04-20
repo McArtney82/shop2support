@@ -39,6 +39,15 @@ class Routes
                 'callback' => [$this, 'setFavourite'],
             ]
         );
+
+        register_rest_route(
+            'custom/v1',
+            'sort',
+            [
+                'methods'  => 'POST',
+                'callback' => [$this, 'getOffers'],
+            ]
+        );
     }
 
     /**
@@ -94,11 +103,16 @@ class Routes
             }
         }
 
+        $direction = (array_key_exists('direction',$_GET)) ? $_GET['direction'] : '';
+        $order = (array_key_exists('sort',$_GET)) ? $_GET['sort'] : '';
+        error_log('Order is');
+        error_log($order);
         $query = [
             'post_type'   => 'offer',
             'fields'      => 'ids',
             'post__in'    => $offers,
-            'orderby'     => 'post__in',
+            'orderby'     => $order,
+            'order'       => $direction,
             'numberposts' => $_GET['per_page'] ?: -1,
             'offset'      => $_GET['offset'] ?: 0,
             's'           => $_GET['search'],

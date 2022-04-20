@@ -10,7 +10,7 @@
             />
         </div>
         <div>
-            <select class="js-example-basic-single _w-80">
+            <select class="js-category-filter-list _w-80">
                 <option value="" selected disabled>
                     Search a category
                 </option>
@@ -19,6 +19,15 @@
                     {{ category.name }}
                 </option>
             </select>
+          <select class="js-sort-filter-list _w-80">
+            <option value="" selected disabled>
+              Sort Offers
+            </option>
+            <option v-for="sort in sort_items"
+                    :value="sort.value">
+              {{ sort.display }}
+            </option>
+          </select>
             <div v-if="args.category.id" class="_mt-4">
                 <span @click="resetCategory"
                       class="_Badge _cursor-pointer">
@@ -33,7 +42,7 @@
 <script>
 import { reactive, ref, toRefs, computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
-import { DISPATCH_FAVOURITES, DISPATCH_CATEGORY, GET_CATEGORY, IS_FAVOURITES } from '@/store/types'
+import { DISPATCH_FAVOURITES, DISPATCH_CATEGORY, DISPATCH_SORT, GET_CATEGORY, GET_SORT, IS_FAVOURITES } from '@/store/types'
 import { UiToggle } from '@/components/Ui'
 
 export default {
@@ -48,21 +57,23 @@ export default {
     setup (props) {
         const store = useStore()
         const item = ref('')
+        const sort_items = [{value:'a-z',display:'A-Z'},{value:'z-a',display:'Z-A'}]
 
         const { categories } = toRefs(props)
-
-        const options = [{ country: 'Canada', code: 'CA' }]
-
         const args = reactive({
             favouritesOnly: computed(() => store.getters['offers/' + IS_FAVOURITES]),
-            category: computed(() => store.getters['offers/' + GET_CATEGORY])
+            category: computed(() => store.getters['offers/' + GET_CATEGORY]),
+            sort:computed(()=>store.getters['offers/' + GET_SORT])
         })
+
 
         onMounted(() => {
             jQuery(document).ready(function () {
-                jQuery('.js-example-basic-single').select2()
+                jQuery('.js-category-filter-list').select2()
+                jQuery('.js-sort-filter-list').select2()
+                jQuery('.js-sort-filter-list').addClass('_ml-10')
 
-                jQuery('.js-example-basic-single').on('select2:select', function (e) {
+                jQuery('.js-category-filter-list').on('select2:select', function (e) {
                     setCategory({
                         id: e.target.value,
                         name: Object.values(categories.value).find(x => {
@@ -70,12 +81,21 @@ export default {
                         }).name
                     })
                 })
+
+                jQuery('.js-sort-filter-list').on('select2:select', function (e) {
+                  setSort(e.target.value)
+                })
             })
         })
 
         watch(() => args.category, (x) => {
-            jQuery('.js-example-basic-single').val(x.id)
-            jQuery('.js-example-basic-single').trigger('change')
+            jQuery('.js-category-filter-list').val(x.id)
+            jQuery('.js-category-filter-list').trigger('change')
+        })
+
+        watch(() => args.sort, (x) => {
+            jQuery('.js-sort-filter-list').val(x)
+            jQuery('.js-sort-filter-list').trigger('change')
         })
 
         function resetCategory () {
@@ -90,10 +110,14 @@ export default {
             store.dispatch(`offers/${DISPATCH_CATEGORY}`, category)
         }
 
+      function setSort (sort) {
+          store.dispatch(`offers/${DISPATCH_SORT}`, sort)
+      }
+
         return {
             args,
             item,
-            options,
+            sort_items,
             resetCategory,
             setFavourites,
         }

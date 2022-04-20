@@ -1,4 +1,4 @@
-import { GET_CATEGORY, GET_RESULTS, GET_SEARCH, IS_FAVOURITES } from '@/store/types'
+import { GET_CATEGORY, GET_RESULTS, GET_SEARCH, GET_SORT, IS_FAVOURITES } from '@/store/types'
 
 export default {
     /**
@@ -13,6 +13,12 @@ export default {
      * @param state
      */
     [GET_SEARCH]: state => state.search,
+
+    /**
+     *
+     * @param state
+     */
+    [GET_SORT]: state => state.sort,
 
     /**
      *
