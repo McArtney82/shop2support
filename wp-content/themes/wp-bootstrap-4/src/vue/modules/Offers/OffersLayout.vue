@@ -119,6 +119,7 @@ export default {
         }
 
         function fetchOffers () {
+            console.log('fetching')
             let route = `${routes.get}?post_id=${postId.value}&offset=${args.offset}&per_page=${args.perPage}`
 
             if (args.category.id) {
@@ -149,7 +150,7 @@ export default {
               }
               route += `&sort=${sort}&direction=${direction}`
             }
-
+            console.log(args.offset += args.perPage);
             return req.get(route)
                 .then(handleErrors)
                 .then(res => {
@@ -172,6 +173,7 @@ export default {
             if (!erase && args.results.length >= args.total) {
                 return
             }
+           document.body.style.overflow = 'hidden';
             load(fetchOffers).then(({ results }) => {
                 if (erase) {
                     store.dispatch('offers/' + DISPATCH_RESULTS, results)
@@ -182,6 +184,7 @@ export default {
                     ...results
                 ])
             })
+          document.body.style.overflow = 'scroll';
         }
 
         return {
