@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Config;
 
+use App\Utils\affiliateLinks;
+
 /**
  * Class Routes
  * @package App\Config
@@ -105,8 +107,6 @@ class Routes
 
         $direction = (array_key_exists('direction',$_GET)) ? $_GET['direction'] : '';
         $order = (array_key_exists('sort',$_GET)) ? $_GET['sort'] : '';
-        error_log('Order is');
-        error_log($order);
         $query = [
             'post_type'   => 'offer',
             'fields'      => 'ids',
@@ -164,24 +164,7 @@ class Routes
                     }
                 }
 
-                $link_suffix = '';
-
-                switch (get_field('affiliate_manager', $id)) {
-                    case 'Commission Factory':
-                        $link_suffix = "&UniqueId=" . $affliate_code;
-                        break;
-                    case 'Rakuten':
-                        $link_suffix = "&u1=" . $affliate_code;
-                        break;
-                    case 'Commission Junction':
-                        $link_suffix = "?sid=" . $affliate_code;
-                        break;
-                    case 'Hotels Combined':
-                        $link_suffix = "&label=" . $affliate_code;
-                        break;
-                    case 'Partnerize':
-                        $link_suffix = 'pubref:' . $affliate_code;
-                }
+                $link_suffix =  affiliateLinks::get_link_suffix(get_field('affiliate_manager', $id),$affliate_code);
 
                 $data = [
                     'id'          => $id,

@@ -29,6 +29,9 @@ class affiliateLinks
             case 'AWIN':
                 $link_suffix = '&clickref='.$affiliate_code;
                 break;
+            case 'ShareASale':
+                $link_suffix = '&afftrack='.$affiliate_code;
+                break;
         }
         return $link_suffix;
     }
