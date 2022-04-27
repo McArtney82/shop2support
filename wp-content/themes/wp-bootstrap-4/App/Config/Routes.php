@@ -163,8 +163,8 @@ class Routes
                             break;
                     }
                 }
-
-                $link_suffix =  affiliateLinks::get_link_suffix(get_field('affiliate_manager', $id),$affliate_code);
+                $affiliate_links = new affiliateLinks();
+                $link_suffix =  $affiliate_links->get_link_suffix(get_field('affiliate_manager', $id),$affliate_code);
 
                 $data = [
                     'id'          => $id,

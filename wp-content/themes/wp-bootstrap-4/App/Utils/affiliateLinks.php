@@ -8,11 +8,13 @@ class affiliateLinks
 {
 
     /**
-     * @param $affiliate_manager
-     * @param $affiliate_code
+     * @param string $affiliate_manager
+     * @param string $affiliate_code
      * @return string
      */
-    function get_link_suffix($affiliate_manager, $affiliate_code){
+    public function get_link_suffix(string $affiliate_manager, string $affiliate_code): string
+    {
+        $link_suffix = "";
         switch($affiliate_manager){
             case 'Commission Factory':
                 $link_suffix = "&UniqueId=".$affiliate_code;
