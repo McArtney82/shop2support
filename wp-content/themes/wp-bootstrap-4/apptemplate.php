@@ -146,7 +146,7 @@ $categories = array_map(function ($x) {
     console.log('iPod:' + isIpod)
     console.log('iPad:' + isIpad)
     console.log('iPhone:' + isIphone)
-    var isInWebAppiOS = (window.navigator.standalone == true)
+    let isInWebAppiOS = (window.navigator.standalone == true);
 
     //var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
     var isChrome = (navigator.userAgent.match('CriOS'))
@@ -172,8 +172,6 @@ $categories = array_map(function ($x) {
         var loading = jQuery.loading({
             imgPath: '<?php echo get_template_directory_uri() . "/assets/js/img/"?>ajax-loading.gif'
         })
-
-        console.log(jQuery(window).data('ajaxready'))
 
         jQuery('#btnAdd').click(function (e) {
             e.preventDefault()
@@ -207,7 +205,7 @@ $categories = array_map(function ($x) {
 
         }
 
-        if (isIos && !isInWebAppIos && isChrome) {
+        if (isIos && !isInWebAppiOS && isChrome) {
             jQuery('#chrome-install-prompt').hide()
         }
 
