@@ -67,7 +67,7 @@ class Assets
         }
 
         if (!in_array($handle, ['autocomplete-js'], true)) {
-            $src .= '?ver=669';
+            $src .= '?ver=670';
         }
 
         return $src;
