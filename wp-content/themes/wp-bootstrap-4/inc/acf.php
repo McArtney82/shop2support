@@ -121,10 +121,11 @@ if( function_exists('acf_add_local_field_group') ):
                 'choices' => array(
                     'Commission Factory' => 'Commission Factory',
                     'Rakuten' => 'Rakuten',
-                    'Hotels Combined' => 'Hotels Combined',
                     'Commission Junction' => 'Commission Junction',
-                    'AWIN' => 'AWIN',
                     'Partnerize' => 'Partnerize',
+                    'Impact' => 'Impact',
+                    'ShareASale' => 'ShareASale',
+                    'AWIN' => 'AWIN',
                 ),
                 'allow_null' => 0,
                 'other_choice' => 0,
