@@ -34,6 +34,9 @@ class affiliateLinks
             case 'ShareASale':
                 $link_suffix = '&afftrack='.$affiliate_code;
                 break;
+            case 'Impact':
+                $link_suffix = '&subId1='.$affiliate_code;
+                break;
         }
         return $link_suffix;
     }
