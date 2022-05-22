@@ -32,3 +32,4 @@
 /xmlrpc.php
 /wp-content/plugins/
 /wp-content/themes/wp-bootstrap-4/src/node_modules/
+!/wp-content/plugins/s2s_link_health/
