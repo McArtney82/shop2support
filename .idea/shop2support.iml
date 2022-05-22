@@ -7,7 +7,6 @@
       <excludeFolder url="file://$MODULE_DIR$/wp-content/languages" />
       <excludeFolder url="file://$MODULE_DIR$/wp-content/upgrade" />
       <excludeFolder url="file://$MODULE_DIR$/wp-content/uploads" />
-      <excludeFolder url="file://$MODULE_DIR$/wp-includes" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
