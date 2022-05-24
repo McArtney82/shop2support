@@ -53,6 +53,7 @@ class s2sListTable extends \WP_List_Table
 	protected function get_sortable_columns(): array
 	{
 		$sortable_columns = array(
+			'ID' => array('ID',false),
 			'retailer'  => array('retailer', false),
 			'network' => array('network', false),
 			'status'   => array('status', true)
@@ -72,6 +73,65 @@ class s2sListTable extends \WP_List_Table
 		return '';
 	}
 
+	protected function column_cb($item) {
+		return sprintf(
+			'<input type="checkbox" name="link[]" value="%s" />', $item['ID']
+		);
+	}
+
+	protected function usort_reorder( $a, $b ) {
+		// If no sort, default to title
+		$orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'ID';
+		// If no order, default to asc
+		$order = ( ! empty($_GET['order'] ) ) ? $_GET['order'] : 'asc';
+		// Determine sort order
+		$result = strcmp( $a[$orderby], $b[$orderby] );
+		// Send final sort direction to usort
+		return ( $order === 'asc' ) ? $result : -$result;
+	}
+
+	protected function get_bulk_actions() {
+		return array(
+			'delete' => 'Delete'
+		);
+	}
+
+	public function process_bulk_action() {
+
+		// security check!
+		if ( isset( $_POST['_wpnonce'] ) && ! empty( $_POST['_wpnonce'] ) ) {
+
+			$nonce  = filter_input( INPUT_POST, '_wpnonce', FILTER_SANITIZE_STRING );
+			$action = 'bulk-' . $this->_args['plural'];
+
+			if ( ! wp_verify_nonce( $nonce, $action ) )
+				wp_die( 'Nope! Security check failed!' );
+
+		}
+
+		$action = $this->current_action();
+
+		switch ( $action ) {
+
+			case 'delete':
+				$links = $_REQUEST['link'];
+				$count = 0;
+				foreach($links as $link){
+					wp_delete_post($link);
+					$count++;
+				}
+				wp_redirect($_REQUEST['_wp_http_referer'].'&del=1&count='.$count);
+				break;
+
+			default:
+				// do nothing or something else
+				return;
+				break;
+		}
+
+		return;
+	}
+
 
 	/**
 	 * @return void
@@ -81,6 +141,7 @@ class s2sListTable extends \WP_List_Table
 		$hidden = $this->get_hidden_columns();
 		$sortable = $this->get_sortable_columns();
 		$this->_column_headers = array($this->get_columns(), $hidden, $sortable);
+		usort( $this->tableData, array( &$this, 'usort_reorder' ) );
 		$this->items = $this->tableData;
 		/* pagination */
 		$per_page = 10;
@@ -97,6 +158,7 @@ class s2sListTable extends \WP_List_Table
 		//usort($this->users_data, array(&$this, 'usort_reorder'));
 
 		$this->items = $this->tableData;
+		$this->process_bulk_action();
 	}
 
 
@@ -128,15 +190,4 @@ class s2sListTable extends \WP_List_Table
 				return print_r($item, true); //Show the whole array for troubleshooting purposes
 		}
 	}
-
-
-	function column_cb($item)
-	{
-		return sprintf(
-			'<input type="checkbox" name="user[]" value="%s" />',
-			$item['ID']
-		);
-	}
-
-
 }
