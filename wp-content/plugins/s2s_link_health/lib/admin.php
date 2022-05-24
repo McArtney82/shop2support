@@ -24,14 +24,63 @@ class admin
 		$this->affiliateLinks = new affiliateLinks();
 		add_action("wp_ajax_get_s2slink_status", [$this,'getLinkStatus']);
 		add_action("wp_ajax_nopriv_get_s2slink_status", [$this,'getLinkStatus']);
+		add_action('wp',[$this,'registerCron']);
+		add_action('checkS2SLinks',[$this,'cronCheckS2SLinks']);
 	}
 
-	public function registerAdminPage()
+	public function registerCron():void
+	{
+		if (! wp_next_scheduled ( 'checkS2SLinks' )) {
+			wp_schedule_event(time(), 'hourly', 'checkS2SLinks');
+		}
+	}
+
+	public function cronCheckS2SLinks($debug = false):void
+	{
+		// WP_Query arguments
+		$args = array(
+			'post_type'              => 'offer',
+			'post_status'            => 'publish',
+			'number' => 10,
+			'meta_query' => [
+				'relation' => 'OR',
+				[
+					'key' => 'link_status',
+					'compare' => '=',
+					'value' =>	''
+				],
+				[
+					'key' => 'link_status',
+					'compare' => 'NOT EXISTS'
+				]
+			]
+		);
+
+		// The Query
+		$links = new WP_Query( $args );
+
+		// The Loop
+		if ($links->have_posts()) {
+			$i = 0;
+			while ($links->have_posts()) {
+				$i++;
+				$links->the_post();
+				$status = $this->getLinkStatus(get_the_ID(), get_field('code_') . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager'),'s2s'));
+				if($debug){
+					echo $i.':'.get_the_title().' status: '.$status;
+				}
+			}
+		}
+		// Restore original Post Data
+		wp_reset_postdata();
+	}
+
+	public function registerAdminPage():void
 	{
 		add_menu_page('Shop2Support Link Affliate Health Check','Shop2Support Link Check','edit_posts','s2s_links',[$this,'showAdminPage'],'dashicons-analytics',2);
 	}
 
-	public function showAdminPage()
+	public function showAdminPage():void
 	{
 		//add javascript
 		wp_register_script( 's2sLink_plugin_script', plugins_url('../js/main.js', __FILE__), array('jquery'));
@@ -124,16 +173,24 @@ class admin
 		?>
 		<div class="wrap">
 			<h1>Shop2Support Affliate Link Check</h1>
+			<?php if($_REQUEST['del']){
+				echo '<div class="updated"><p>'.$_REQUEST['count'].' link(s) deleted</p></div>';
+			}?>
+			<form method="post">
+				<input type="hidden" name="page" value="s2s_links" />
 		<?php
 		$this->LinkListTable->prepare_items();
 		$this->LinkListTable->display();
 		?>
+			</form>
 		</div>
 		<?php
 	}
-	function getLinkStatus(){
-		$url = $_REQUEST['link'];
-		$id = $_REQUEST['id'];
+	function getLinkStatus($id = '', $url = ''){
+		if(!$id || !$url){ //TODO tidy up to handle one or the other
+			$url = $_REQUEST['link'];
+			$id = $_REQUEST['id'];
+		}
 		$handle = curl_init($url);
 		curl_setopt($handle,CURLOPT_HEADER,0);
 		curl_setopt($handle,CURLOPT_RETURNTRANSFER,1);
@@ -144,7 +201,7 @@ class admin
 		$httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 		error_log($currentCode);
 		error_log($httpCode);
-		if($currentCode && $currentCode != $httpCode)
+		if(!$currentCode || $currentCode != $httpCode)
 			update_field('link_last_checked',date('d/m/Y H:i:s'),$id);
 		update_field('link_status',$httpCode,$id);
 		echo json_encode($httpCode);
