@@ -12,8 +12,8 @@ use App\Utils\affiliateLinks;
 class admin
 {
 
-	private s2sListTable $LinkListTable;
-	private affiliateLinks $affiliateLinks;
+	private $LinkListTable;
+	private $affiliateLinks;
 
 	/**
 	 * @constructor

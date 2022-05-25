@@ -15,7 +15,7 @@ class s2sListTable extends \WP_List_Table
 	/**
 	 * @var array
 	 */
-	public array $tableData;
+	public $tableData;
 
 	/**
 	 * @param array $tableData
