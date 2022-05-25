@@ -41,7 +41,7 @@ class admin
 		$args = array(
 			'post_type'              => 'offer',
 			'post_status'            => 'publish',
-			'number' => 10,
+			'posts_per_page' => 10,
 			'meta_query' => [
 				'relation' => 'OR',
 				[
@@ -58,16 +58,16 @@ class admin
 
 		// The Query
 		$links = new WP_Query( $args );
-
 		// The Loop
 		if ($links->have_posts()) {
 			$i = 0;
 			while ($links->have_posts()) {
 				$i++;
 				$links->the_post();
+				error_log($i);
 				$status = $this->getLinkStatus(get_the_ID(), get_field('code_') . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager'),'s2s'));
 				if($debug){
-					echo $i.':'.get_the_title().' status: '.$status;
+					echo '<p>'.$i.':'.get_the_title().' status: '.$status.'</p>';
 				}
 			}
 		}
@@ -187,9 +187,11 @@ class admin
 		<?php
 	}
 	function getLinkStatus($id = '', $url = ''){
+		$return = true;
 		if(!$id || !$url){ //TODO tidy up to handle one or the other
 			$url = $_REQUEST['link'];
 			$id = $_REQUEST['id'];
+			$return = false;
 		}
 		$handle = curl_init($url);
 		curl_setopt($handle,CURLOPT_HEADER,0);
@@ -204,7 +206,10 @@ class admin
 		if(!$currentCode || $currentCode != $httpCode)
 			update_field('link_last_checked',date('d/m/Y H:i:s'),$id);
 		update_field('link_status',$httpCode,$id);
-		echo json_encode($httpCode);
-		die();
+		if(!$return){
+			echo json_encode($httpCode);
+			die();
+		}
+		return $httpCode;
 	}
 }
