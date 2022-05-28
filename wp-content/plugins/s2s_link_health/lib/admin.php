@@ -33,9 +33,49 @@ class admin
 		if (! wp_next_scheduled ( 'checkS2SLinks' )) {
 			wp_schedule_event(time(), 'hourly', 'checkS2SLinks');
 		}
+
+		if (! wp_next_scheduled ( 'clearS2SLinks' )) {
+			wp_schedule_event(strtotime('23:59:59'), 'daily', 'clearS2SLinks');
+		}
 	}
 
-	public function cronCheckS2SLinks($debug = false):void
+	public function clearS2SLinks():void
+	{
+		// WP_Query arguments
+		$args = array(
+			'post_type'              => 'offer',
+			'post_status'            => 'publish',
+			'posts_per_page' => 10,
+			'meta_query' => [
+				'relation' => 'AND',
+				[
+					'key' => 'link_status',
+					'compare' => '!=',
+					'value' =>	''
+				],
+				[
+					'key' => 'link_status',
+					'compare' => 'EXISTS'
+				]
+			]
+		);
+
+		// The Query
+		$links = new WP_Query( $args );
+		// The Loop
+		if ($links->have_posts()) {
+			$i = 0;
+			while ($links->have_posts()) {
+				$links->the_post();
+				update_field('link_last_checked','');
+				update_field('link_status','');
+			}
+		}
+		// Restore original Post Data
+		wp_reset_postdata();
+	}
+
+	public function checkS2SLinks($debug = false):void
 	{
 		// WP_Query arguments
 		$args = array(
@@ -64,7 +104,6 @@ class admin
 			while ($links->have_posts()) {
 				$i++;
 				$links->the_post();
-				error_log($i);
 				$status = $this->getLinkStatus(get_the_ID(), get_field('code_') . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager'),'s2s'));
 				if($debug){
 					echo '<p>'.$i.':'.get_the_title().' status: '.$status.'</p>';
