@@ -26,6 +26,7 @@ class admin
 		add_action("wp_ajax_nopriv_get_s2slink_status", [$this,'getLinkStatus']);
 		add_action('wp',[$this,'registerCron']);
 		add_action('checkS2SLinks',[$this,'cronCheckS2SLinks']);
+		add_action('clearS2SLinks',[$this,'cronClearS2SLinks']);
 	}
 
 	public function registerCron():void
@@ -35,17 +36,18 @@ class admin
 		}
 
 		if (! wp_next_scheduled ( 'clearS2SLinks' )) {
-			wp_schedule_event(strtotime('23:59:59'), 'daily', 'clearS2SLinks');
+			wp_schedule_event(time(), 'daily', 'clearS2SLinks');
 		}
 	}
 
-	public function clearS2SLinks():void
+	public function cronClearS2SLinks():void
 	{
 		// WP_Query arguments
 		$args = array(
 			'post_type'              => 'offer',
 			'post_status'            => 'publish',
-			'posts_per_page' => 10,
+			'nopaging'				 => 'true',
+			'posts_per_page'		=> '-1',
 			'meta_query' => [
 				'relation' => 'AND',
 				[
@@ -75,7 +77,7 @@ class admin
 		wp_reset_postdata();
 	}
 
-	public function checkS2SLinks($debug = false):void
+	public function cronCheckS2SLinks($debug = false):void
 	{
 		// WP_Query arguments
 		$args = array(
