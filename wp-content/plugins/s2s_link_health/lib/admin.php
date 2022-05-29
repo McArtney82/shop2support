@@ -29,6 +29,7 @@ class admin
 		add_action('clearS2SLinks',[$this,'cronClearS2SLinks']);
 	}
 
+
 	public function registerCron():void
 	{
 		if (! wp_next_scheduled ( 'checkS2SLinks' )) {
@@ -128,13 +129,11 @@ class admin
 		wp_localize_script( 's2sLink_plugin_script', 'myAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' )));
 		wp_enqueue_script( 's2sLink_plugin_script' );
 		$row_data = [];
-		// WP_Query arguments
-		$args = array(
-			'post_type'              => 'offer',
-			'post_status'            => 'publish',
-			'nopaging'				 => 'true',
-			'posts_per_page'		=> '-1',
-			'meta_query' => [
+		$this->LinkListTable = new s2sListTable();
+		$link_status = isset( $_GET['link_status'] ) ? $_GET['link_status'] : 0;
+		// WP_Query arguments for links with status
+		if($link_status != 'unknown'){
+			$meta_query = [
 				'relation' => 'AND',
 				[
 					'key' => 'link_status',
@@ -145,84 +144,99 @@ class admin
 					'key' => 'link_status',
 					'compare' => 'EXISTS'
 				]
-			]
-		);
+			];
 
-		// The Query
-		$links = new WP_Query( $args );
+			$args = array(
+				'post_type'              => 'offer',
+				'post_status'            => 'publish',
+				'nopaging'				 => 'true',
+				'posts_per_page'		=> '-1',
+				'meta_query' => $meta_query
+			);
 
-		// The Loop
-		if ($links->have_posts()) {
-			while ($links->have_posts()) {
-				$links->the_post();
-				$url = get_field('code_') . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager'),'s2s');
-				$row_data[] = [
-					'ID' => get_the_ID(),
-					'retailer' => get_the_title(),
-					'link' => $url,
-					'network' => get_field('affiliate_manager'),
-					'status' => get_field('link_status')
-				];
+			// The Query
+			$links = new WP_Query( $args );
+
+			// The Loop
+			if ($links->have_posts()) {
+				while ($links->have_posts()) {
+					$links->the_post();
+					$status = $this->LinkListTable->getStatus(get_field('link_status'));
+					$url = get_field('code_') . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager'),'s2s');
+					if($status == $link_status || !$link_status){
+						$row_data[] = [
+							'ID' => get_the_ID(),
+							'retailer' => get_the_title(),
+							'link' => '<a href="'.$url.'" target="_blank">'.$url.'</a>',
+							'network' => get_field('affiliate_manager'),
+							'status' => get_field('link_status')
+						];
+					}
+				}
 			}
+			// Restore original Post Data
+			wp_reset_postdata();
 		}
-		// Restore original Post Data
-		wp_reset_postdata();
-		$today = date('Y-m-d',strtotime("-2 days"));
-		// WP_Query arguments
-		$args = array(
-			'post_type'              => 'offer',
-			'post_status'            => 'publish',
-			'nopaging'				 => 'true',
-			'posts_per_page'		=> '-1',
-			'meta_query' => [
-				'relation' => 'OR',
-				[
-					'key' => 'link_status',
-					'compare' => 'NOT EXISTS'
-				],
-				[
-					'key' => 'link_status',
-					'compare' => '=',
-					'value' => ''
+
+		if(!$link_status || $link_status == 'unknown'){
+			$today = date('Y-m-d',strtotime("-2 days"));
+			// WP_Query arguments
+			$args = array(
+				'post_type'              => 'offer',
+				'post_status'            => 'publish',
+				'nopaging'				 => 'true',
+				'posts_per_page'		=> '-1',
+				'meta_query' => [
+					'relation' => 'OR',
+					[
+						'key' => 'link_status',
+						'compare' => 'NOT EXISTS'
+					],
+					[
+						'key' => 'link_status',
+						'compare' => '=',
+						'value' => ''
+					]
 				]
-			]
-		);
+			);
 
-		// The Query
-		$links = new WP_Query( $args );
+			// The Query
+			$links = new WP_Query( $args );
 
-		// The Loop
-		if ($links->have_posts()) {
-			while ($links->have_posts()) {
-				$links->the_post();
-				update_field('link_status','');
-				$url = get_field('code_') . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager'),'s2s');
-				$row_data[] = [
-					'ID' => get_the_ID(),
-					'retailer' => get_the_title(),
-					'link' => $url,
-					'network' => get_field('affiliate_manager'),
-					'status' => 'waiting'
-				];
+			// The Loop
+			if ($links->have_posts()) {
+				while ($links->have_posts()) {
+					$links->the_post();
+					update_field('link_status','');
+					$url = get_field('code_') . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager'),'s2s');
+					$row_data[] = [
+						'ID' => get_the_ID(),
+						'retailer' => get_the_title(),
+						'link' => '<a href="'.$url.'" target="_blank">'.$url.'</a>',
+						'network' => get_field('affiliate_manager'),
+						'status' => 'waiting'
+					];
+				}
 			}
+			// Restore original Post Data
+			wp_reset_postdata();
 		}
-		// Restore original Post Data
-		wp_reset_postdata();
-
-		$this->LinkListTable = new s2sListTable($row_data);
+		$this->LinkListTable->setTableData($row_data);
 		//error_log(print_r($this->LinkListTable->tableData,true));
 		?>
 		<div class="wrap">
 			<h1>Shop2Support Affliate Link Check</h1>
 			<?php if($_REQUEST['del']){
 				echo '<div class="updated"><p>'.$_REQUEST['count'].' link(s) deleted</p></div>';
-			}?>
+			}
+			$this->LinkListTable->prepare_items();
+			//$this->LinkListTable->views();
+			?>
 			<form method="post">
 				<input type="hidden" name="page" value="s2s_links" />
-		<?php
-		$this->LinkListTable->prepare_items();
-		$this->LinkListTable->display();
-		?>
+				<?php
+				$this->LinkListTable->display();
+				?>
 			</form>
 		</div>
 		<?php
