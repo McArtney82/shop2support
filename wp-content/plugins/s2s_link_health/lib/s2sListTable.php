@@ -16,13 +16,23 @@ class s2sListTable extends \WP_List_Table
 	 * @var array
 	 */
 	public $tableData;
+	/**
+	 * @var array
+	 */
+	public $statusArr;
 
 	/**
 	 * @param array $tableData
 	 */
-	public function __construct(array $tableData)
+	public function __construct()
 	{
-		$this->tableData = $tableData;
+		$this->setStatusArr([
+			'200'=>'success',
+			'400'=>'failed',
+			'403'=>'failed',
+			'404'=>'failed',
+			'503'=>'failed'
+		]);
 		parent::__construct( [
 			'singular' => 'Link', //singular name of the listed records
 			'plural'   => 'Links', //plural name of the listed records
@@ -30,6 +40,64 @@ class s2sListTable extends \WP_List_Table
 		] );
 	}
 
+	/**
+	 * @param array $tableData
+	 */
+	public function setTableData(array $tableData): void
+	{
+		$this->tableData = $tableData;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getStatus(string $statusCode): string
+	{
+		if(!array_key_exists($statusCode,$this->statusArr))
+			return 'check';
+		return $this->statusArr[$statusCode];
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getStatusArr(): array
+	{
+		return $this->statusArr;
+	}
+
+
+
+	/**
+	 * @param array $statusArr
+	 */
+	public function setStatusArr($statusArr): void
+	{
+		$this->statusArr = $statusArr;
+	}
+
+
+	protected function extra_tablenav( $which )
+	{
+		switch ( $which )
+		{
+			case 'top':
+				$link_status = isset( $_GET['link_status'] ) ? $_GET['link_status'] : 0;
+				$link = '/wp-admin/admin.php?page='.$_REQUEST['page'];
+				?>
+				<div class="alignleft actions">
+					<select name="link_status" id="link_status">
+						<option value="all" <?php selected($link_status,0) ?> data-rc="<?php echo $link ?>">All</option>
+						<option value="failed" <?php selected($link_status,'failed') ?> data-rc="<?php echo $link ?>&link_status=failed">Failed</option>
+						<option value="check" <?php selected($link_status,'check') ?> data-rc="<?php echo $link ?>&link_status=check">Check</option>
+						<option value="unknown" <?php selected($link_status,'unknown') ?> data-rc="<?php echo $link ?>&link_status=unknown">Status Unknown</option>
+					</select>
+				<a href="javascript:void(0)" class="button" onclick="window.location.href = jQuery('#link_status option:selected').data('rc');">Filter</a>
+				</div>
+				<?php
+				break;
+		}
+	}
 
 	/**
 	 * @return array
@@ -176,11 +244,12 @@ class s2sListTable extends \WP_List_Table
 			case 'network':
 				return $item[$column_name];
 			case 'status':
+				$status = $this->getStatus($item[$column_name]);
 				if($item[$column_name] == 'waiting'){
 					return '<span class="status-span spinner is-active" style="float:left" data-status="loading"></span>';
-				} elseif ($item[$column_name] == '200') {
+				} elseif ($status == 'success') {
 					return '<span class="status-span" style="color:green" data-status="200">Passed</span>';
-				} elseif($item[$column_name] == '404' || $item[$column_name] == '400' || $item[$column_name] == '503' || $item[$column_name] == '403'){
+				} elseif($status == 'failed'){
 					return '<span class="status-span" style="color:orangered" data-status="'.$item[$column_name].'">Failed '.$item[$column_name].'</span>';
 				} else {
 					return '<span class="status-span" style="color:orange" data-status="'.$item[$column_name].'">Check</span>';

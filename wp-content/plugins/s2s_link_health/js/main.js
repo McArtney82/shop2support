@@ -2,13 +2,13 @@ jQuery(document).ready(function($) {
 	console.log('loaded')
 	jQuery('#the-list > tr').each(function () {
 		var thisrow = jQuery(this)
-		var link = jQuery(this).children('td.link').html()
+		var link = jQuery(this).children('td.link').children('a').html()
 		var id = jQuery(this).children('td.ID').children('a').html()
 		var status =  jQuery(this).children('td.status').children('.status-span').data('status')
+		console.log(link)
+		console.log(status)
 		if (link && status === "loading"){
 			console.log(id)
-			console.log(link)
-			console.log(status)
 			$.ajax({
 				type:'post',
 				url:myAjax.ajaxurl,
