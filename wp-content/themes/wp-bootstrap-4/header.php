@@ -74,11 +74,14 @@ wp_get_current_user(); ?>
                              class="_max-w-40 _max-h-40"
                         />
                     </div>
-                    <?php if (is_user_logged_in()) : ?>
+                    <?php if (is_user_logged_in()) { ?>
                         <div>
-                            Welcome, <?= $current_user->user_login ?>
+                            <p>Welcome, <?= $current_user->user_login ?></p>
+                            <p><a href="<?php echo wp_logout_url()?>">Logout</a></p>
                         </div>
-                    <?php endif; ?>
+                    <?php } else {?>
+                        <p><a href="<?php echo wp_logout_url()?>">Login</a></p>
+                    <?php } ?>
                 </div>
             <?php endif; ?>
         </div><!-- /.container -->

@@ -35,6 +35,11 @@ if( function_exists('acf_add_local_field_group') ):
                     'operator' => '==',
                     'value' => 'customer',
                 ),
+                array(
+                    'param' => 'options_page',
+                    'operator' => '!=',
+                    'value' => 'acf-options',
+                ),
             ),
             array(
                 array(
@@ -42,12 +47,22 @@ if( function_exists('acf_add_local_field_group') ):
                     'operator' => '==',
                     'value' => 'administrator',
                 ),
+                array(
+                    'param' => 'options_page',
+                    'operator' => '!=',
+                    'value' => 'acf-options',
+                ),
             ),
             array(
                 array(
                     'param' => 'current_user_role',
                     'operator' => '==',
                     'value' => 'pms_subscription_plan_1323',
+                ),
+                array(
+                    'param' => 'options_page',
+                    'operator' => '!=',
+                    'value' => 'acf-options',
                 ),
             ),
         ),
@@ -59,7 +74,6 @@ if( function_exists('acf_add_local_field_group') ):
         'hide_on_screen' => '',
         'active' => true,
         'description' => '',
-        'show_in_rest' => false,
     ));
 
     acf_add_local_field_group(array(
@@ -422,6 +436,48 @@ if( function_exists('acf_add_local_field_group') ):
         'active' => true,
         'description' => '',
         'show_in_rest' => false,
+    ));
+
+    acf_add_local_field_group(array(
+        'key' => 'group_62bb751839c75',
+        'title' => 'Options Page',
+        'fields' => array(
+            array(
+                'key' => 'field_62bb75394f052',
+                'label' => 'Reset Password Manager',
+                'name' => 'reset_password_manager',
+                'type' => 'email',
+                'instructions' => 'Enter an email address where all reset password requests will be sent',
+                'required' => 1,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => '',
+                'prepend' => '',
+                'append' => '',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'options_page',
+                    'operator' => '==',
+                    'value' => 'acf-options',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'hide_on_screen' => '',
+        'active' => true,
+        'description' => '',
     ));
 
 endif;

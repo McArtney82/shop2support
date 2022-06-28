@@ -471,6 +471,10 @@ if (!current_user_can('administrator') && !is_admin()) {
 }
 }
 
+if( function_exists('acf_add_options_page') ) {
+    acf_add_options_page();
+}
+
 add_filter( 'login_head', 'custom_login' );
 
 function custom_login(){
@@ -478,8 +482,17 @@ function custom_login(){
 .login h1 a {display:none!important} .reset-pass a{display:none}</style>';
 }
 
-add_filter( 'acf/get_post_types', 'filter_acf_get_post_types', 10, 1 );
+add_action('lrm/mail/before_sent','login_before_email',10,1);
 
-function filter_acf_get_post_types($array){
-    error_log(print_r($array,true));
+function login_before_email($mail_key){
+    if($mail_key === 'lost_password'){
+        add_filter('wp_mail_from','reroute_admin',10,1);
+    } else {
+        remove_filter('wp_mail_from','reroute_admin',10);
+    }
+}
+
+function reroute_admin($from_email){
+    $from_email = (get_field('reset_password_manager','option') ? get_field('reset_password_manager','option') : $from_email);
+    return $from_email;
 }
