@@ -24,6 +24,8 @@ class admin
 		$this->affiliateLinks = new affiliateLinks();
 		add_action("wp_ajax_get_s2slink_status", [$this,'getLinkStatus']);
 		add_action("wp_ajax_nopriv_get_s2slink_status", [$this,'getLinkStatus']);
+		add_action("wp_ajax_s2s_export_csv", [$this,'getLinkCSV']);
+		add_action("wp_ajax_nopriv_s2s_export_csv", [$this,'getLinkCSV']);
 		add_action('wp',[$this,'registerCron']);
 		add_action('checkS2SLinks',[$this,'cronCheckS2SLinks']);
 		add_action('clearS2SLinks',[$this,'cronClearS2SLinks']);
@@ -120,6 +122,7 @@ class admin
 	public function registerAdminPage():void
 	{
 		add_menu_page('Shop2Support Link Affliate Health Check','Shop2Support Link Check','edit_posts','s2s_links',[$this,'showAdminPage'],'dashicons-analytics',2);
+		add_submenu_page('s2s_links','Shop2Support Link Affiliate Export','Export to CSV','edit_posts','s2s_links_csv',[$this,'showAdminCSVPage'],'dashicons-analytics',2);
 	}
 
 	public function showAdminPage():void
@@ -132,7 +135,7 @@ class admin
 		$this->LinkListTable = new s2sListTable();
 		$link_status = isset( $_GET['link_status'] ) ? $_GET['link_status'] : 0;
 		// WP_Query arguments for links with status
-		if($link_status != 'unknown'){
+		if($link_status !== 'unknown'){
 			$meta_query = [
 				'relation' => 'AND',
 				[
@@ -156,7 +159,6 @@ class admin
 
 			// The Query
 			$links = new WP_Query( $args );
-
 			// The Loop
 			if ($links->have_posts()) {
 				while ($links->have_posts()) {
@@ -178,7 +180,8 @@ class admin
 			wp_reset_postdata();
 		}
 
-		if(!$link_status || $link_status == 'unknown'){
+		if(!$link_status || $link_status === 'unknown'){
+			error_log('got here');
 			$today = date('Y-m-d',strtotime("-2 days"));
 			// WP_Query arguments
 			$args = array(
@@ -202,7 +205,7 @@ class admin
 
 			// The Query
 			$links = new WP_Query( $args );
-
+			error_log($links->post_count);
 			// The Loop
 			if ($links->have_posts()) {
 				while ($links->have_posts()) {
@@ -222,12 +225,14 @@ class admin
 			wp_reset_postdata();
 		}
 		$this->LinkListTable->setTableData($row_data);
-		//error_log(print_r($this->LinkListTable->tableData,true));
 		?>
 		<div class="wrap">
 			<h1>Shop2Support Affliate Link Check</h1>
 			<?php if($_REQUEST['del']){
 				echo '<div class="updated"><p>'.$_REQUEST['count'].' link(s) deleted</p></div>';
+			}
+			if ($_REQUEST['draft']) {
+				echo '<div class="updated"><p>' . $_REQUEST['count'] . ' link(s) unpublished</p></div>';
 			}
 			$this->LinkListTable->prepare_items();
 			//$this->LinkListTable->views();
@@ -241,7 +246,68 @@ class admin
 		</div>
 		<?php
 	}
-	function getLinkStatus($id = '', $url = ''){
+	function showAdminCSVPage():void
+	{
+		wp_register_script( 's2sLink_plugin_script', plugins_url('../js/main.js', __FILE__), array('jquery'));
+		wp_localize_script( 's2sLink_plugin_script', 'myAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' )));
+		wp_enqueue_script( 's2sLink_plugin_script' );
+		?>
+		<div class="wrap">
+			<h1>Shop2Support Affliate Link Check</h1>
+			<p>
+				<select id="csv-type">
+					<option value="all">All Links</option>
+					<option value="fail_check">Failed and Check</option>
+					<option value="check">Check only</option>
+					<option value="fail">Failed only</option>
+				</select>
+				<a href="#" class="button-primary" id="s2s-csv-btn">Create CSV</a>
+				<span class="csv-loading status-span spinner" style="float:right" data-status="loading"></span>
+			</p>
+		</div>
+	<?php }
+
+	function getLinkCSV():void
+	{
+		$csvFile = wp_upload_dir().'/export_'.time().'.csv';
+		$type = $_REQUEST['exportType'];
+		switch($type){
+			case 'all':
+				$meta_query = [];
+				break;
+		}
+		$args = array(
+			'post_type'              => 'offer',
+			'post_status'            => 'publish',
+			'nopaging'				 => 'true',
+			'posts_per_page'		=> '-1',
+			'meta_query' => $meta_query
+		);
+		$links = new WP_Query( $args );
+		if($links->have_posts()){
+			$csvArr = [];
+			$csvArr[] = ['ID','Name','Link','Status'];
+			while ($links->have_posts()) {
+				$links->the_post();
+				$status = $this->LinkListTable->getStatus(get_field('link_status'));
+				$url = get_field('code_') . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager'),'s2s');
+				$csvArr[] = [
+					get_the_ID(),
+					get_the_title(),
+					'<a href="'.$url.'" target="_blank">'.$url.'</a>',
+					get_field('affiliate_manager'),
+					get_field('link_status')
+				];
+			}
+			$fsv = fopen($csvFile,'w');
+			fputcsv($fsv, $csvArr);
+			fclose($fsv);
+		}
+		echo json_encode($csvFile);
+		die();
+	}
+	function getLinkStatus($id = '', $url = '')
+	{
 		$return = true;
 		if(!$id || !$url){ //TODO tidy up to handle one or the other
 			$url = $_REQUEST['link'];
@@ -256,8 +322,6 @@ class admin
 		$response = curl_exec($handle);
 		$currentCode = get_field('link_status',$id);
 		$httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-		error_log($currentCode);
-		error_log($httpCode);
 		if(!$currentCode || $currentCode != $httpCode)
 			update_field('link_last_checked',date('d/m/Y H:i:s'),$id);
 		update_field('link_status',$httpCode,$id);

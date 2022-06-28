@@ -10,6 +10,11 @@ if(!class_exists('WP_List_Table')){
 /**
  * Class s2SListTable
  */
+use App\Utils\affiliateLinks;
+
+/**
+ *
+ */
 class s2sListTable extends \WP_List_Table
 {
 	/**
@@ -20,6 +25,11 @@ class s2sListTable extends \WP_List_Table
 	 * @var array
 	 */
 	public $statusArr;
+
+	/**
+	 * @var affiliateLinks
+	 */
+	private $affiliateLinks;
 
 	/**
 	 * @param array $tableData
@@ -33,6 +43,7 @@ class s2sListTable extends \WP_List_Table
 			'404'=>'failed',
 			'503'=>'failed'
 		]);
+		$this->affiliateLinks = new affiliateLinks();
 		parent::__construct( [
 			'singular' => 'Link', //singular name of the listed records
 			'plural'   => 'Links', //plural name of the listed records
@@ -77,7 +88,11 @@ class s2sListTable extends \WP_List_Table
 	}
 
 
-	protected function extra_tablenav( $which )
+	/**
+	 * @param $which
+	 * @return void
+	 */
+	protected function extra_tablenav($which ): void
 	{
 		switch ( $which )
 		{
@@ -129,6 +144,10 @@ class s2sListTable extends \WP_List_Table
 		return $sortable_columns;
 	}
 
+
+	/**
+	 * @return array[]
+	 */
 	protected function get_hidden_columns(): array
 	{
 		$hidden_columns = array(
@@ -137,17 +156,35 @@ class s2sListTable extends \WP_List_Table
 		return $hidden_columns;
 	}
 
-	protected function handle_row_actions( $item, $column_name, $primary ) {
+	/**
+	 * @param $item
+	 * @param $column_name
+	 * @param $primary
+	 * @return string
+	 */
+	protected function handle_row_actions($item, $column_name, $primary ) {
 		return '';
 	}
 
-	protected function column_cb($item) {
+
+	/**
+	 * @param $item
+	 * @return string|void
+	 */
+	protected function column_cb($item): string
+	{
 		return sprintf(
 			'<input type="checkbox" name="link[]" value="%s" />', $item['ID']
 		);
 	}
 
-	protected function usort_reorder( $a, $b ) {
+
+	/**
+	 * @param $a
+	 * @param $b
+	 * @return float|int
+	 */
+	protected function usort_reorder($a, $b ) {
 		// If no sort, default to title
 		$orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'ID';
 		// If no order, default to asc
@@ -158,13 +195,22 @@ class s2sListTable extends \WP_List_Table
 		return ( $order === 'asc' ) ? $result : -$result;
 	}
 
-	protected function get_bulk_actions() {
+
+	/**
+	 * @return array[]
+	 */
+	protected function get_bulk_actions(): array {
 		return array(
-			'delete' => 'Delete'
+			'delete' => 'Delete',
+			'unpublish' => 'Unpublish'
 		);
 	}
 
-	public function process_bulk_action() {
+
+	/**
+	 * @return void
+	 */
+	public function process_bulk_action(): void {
 
 		// security check!
 		if ( isset( $_POST['_wpnonce'] ) && ! empty( $_POST['_wpnonce'] ) ) {
@@ -184,13 +230,27 @@ class s2sListTable extends \WP_List_Table
 			case 'delete':
 				$links = $_REQUEST['link'];
 				$count = 0;
-				foreach($links as $link){
-					wp_delete_post($link);
+				foreach($links as $linkID){
+					wp_delete_post($linkID);
 					$count++;
 				}
 				wp_redirect($_REQUEST['_wp_http_referer'].'&del=1&count='.$count);
 				break;
 
+			case 'unpublish':
+				$links = $_REQUEST['link'];
+				$count = 0;
+				foreach($links as $linkID){
+					wp_update_post(
+						['ID'=>$linkID,
+							'post_status'=>'draft'
+						]
+					);
+					$count++;
+				}
+				wp_redirect($_REQUEST['_wp_http_referer'].'&draft=1&count='.$count);
+				break;
+				break;
 			default:
 				// do nothing or something else
 				return;
@@ -198,6 +258,19 @@ class s2sListTable extends \WP_List_Table
 		}
 
 		return;
+	}
+
+	/**
+	 * @param array $links
+	 * @return array
+	 */
+	public function getCSV(array $links): array
+	{
+		$csv = [];
+		foreach($links as $linkID){
+			$lineArr = [$linkID, get_the_title($linkID), get_field('code_', $linkID) . $this->affiliateLinks->get_link_suffix(get_field('affiliate_manager',$linkID),'s2s')];
+		}
+		return $csv;
 	}
 
 
