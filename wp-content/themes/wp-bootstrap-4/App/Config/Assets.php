@@ -67,7 +67,7 @@ class Assets
         }
 
         if (!in_array($handle, ['autocomplete-js'], true)) {
-            $src .= '?ver=677';
+            $src .= '?ver='.filemtime(get_theme_file_path().'/dist/css/_app.min.css');
         }
 
         return $src;

@@ -107,7 +107,6 @@ export default {
                 window.addEventListener('scroll', debounce(() => {
                     if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 200)) {
                         window.scrollTo(0, document.body.offsetHeight)
-                      document.getElementsByTagName('footer')[0].classList.remove('fixed-bottom')
                         loadMore()
                     }
                 }, 500, { leading: true }))
@@ -186,7 +185,7 @@ export default {
                 ])
             })
           document.body.style.overflow = 'scroll';
-          document.getElementsByTagName('footer')[0].classList.add('fixed-bottom')
+          document.getElementsByTagName('footer')[0].classList.remove('fixed-bottom')
         }
 
         return {
