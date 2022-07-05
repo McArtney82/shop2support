@@ -119,7 +119,6 @@ export default {
         }
 
         function fetchOffers () {
-            console.log('fetching')
             let route = `${routes.get}?post_id=${postId.value}&offset=${args.offset}&per_page=${args.perPage}`
 
             if (args.category.id) {
@@ -150,12 +149,15 @@ export default {
               }
               route += `&sort=${sort}&direction=${direction}`
             }
-            console.log(args.offset += args.perPage);
+
             return req.get(route)
                 .then(handleErrors)
-                .then(res => {
+                .then(
+                    res => {
                     args.total = res.total
                     args.offset += args.perPage
+                    console.log(args.offset)
+                    console.log(args.total)
                     return res
                 })
                 .catch(error => error)
@@ -173,8 +175,9 @@ export default {
             if (!erase && args.results.length >= args.total) {
                 return
             }
-           document.body.style.overflow = 'hidden';
+            document.documentElement.style.setProperty('overflow-y','hidden','important')
             load(fetchOffers).then(({ results }) => {
+              document.documentElement.style.setProperty('overflow-y','auto','important')
                 if (erase) {
                     store.dispatch('offers/' + DISPATCH_RESULTS, results)
                     return
@@ -184,7 +187,6 @@ export default {
                     ...results
                 ])
             })
-          document.body.style.overflow = 'scroll';
           document.getElementsByTagName('footer')[0].classList.remove('fixed-bottom')
         }
 
