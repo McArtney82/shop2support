@@ -478,8 +478,31 @@ function custom_login(){
 .login h1 a {display:none!important} .reset-pass a{display:none}</style>';
 }
 
-add_filter( 'acf/get_post_types', 'filter_acf_get_post_types', 10, 1 );
+add_action('bulk_actions-edit-offer','unPublishOffers');
+add_filter('handle_bulk_actions-edit-offer','handle_unPublishOffers',10,3);
+add_action('admin_notices','offersUnpublished');
 
-function filter_acf_get_post_types($array){
-    error_log(print_r($array,true));
+function unPublishOffers($bulk){
+    $bulk['unpublish'] = __('Unpublish','txtdomain');
+    return $bulk;
+}
+
+function handle_unPublishOffers($redirect_url,$action,$post_ids){
+    if($action == 'unpublish'){
+        foreach ($post_ids as $post_id) {
+            wp_update_post([
+                'ID' => $post_id,
+                'post_status' => 'draft'
+            ]);
+        }
+        $redirect_url = add_query_arg('unpublished', count($post_ids), $redirect_url);
+    }
+    return $redirect_url;
+}
+
+function offersUnpublished(){
+    if (!empty($_REQUEST['unpublished'])) {
+        $num_changed = (int) $_REQUEST['unpublished'];
+        printf('<div id="message" class="updated notice is-dismissable"><p>' . __('Unpublished %d posts.', 'txtdomain') . '</p></div>', $num_changed);
+    }
 }
